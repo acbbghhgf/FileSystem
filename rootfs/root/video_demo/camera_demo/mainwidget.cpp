@@ -8,23 +8,21 @@ mainWidget::mainWidget(QWidget *parent)
     , ui(new Ui::mainWidget)
 {
     ui->setupUi(this);
-    pd.dev_name = "/dev/video0";
-    int flag = init_dev(&pd);
-    if(flag == -1){
-        qDebug() << "no device";
-        ui->textEdit->append("no device /dev/video0\n");
-        return ;
+    mdate.dev_name = "/dev/video0";
+    int flag = init_dev(&mdate);
+    if(flag == -1)
+    {
+        qDebug() << "Can't identify.";
     }
-    else if(flag == -2){
-        qDebug() << "device is wrong.";
-        ui->textEdit->append("device is wrong\n");
-        return ;
-    }
-    else if(flag == -3){
+    else if(flag == -2)
+    {
         qDebug() << "can not open device.";
-        ui->textEdit->append("can not open device.\n");
-        return ;
     }
+    else if(flag == 0)
+    {
+        qDebug() << "open device success.";
+    }
+//    start_capturing(&mdate);
 }
 
 mainWidget::~mainWidget()
@@ -48,25 +46,16 @@ void mainWidget::on_start_pb_clicked()
 {
     unsigned int time_start = 0;
     unsigned int time_end = 0;
-    time_start = getCurrentTime("start obt image.");
     QImage image_raw;
-//    QImage image_raw_rgb;
-    for(int i = 0; i< 8; i++){
-        read_frame(&pd);
-        return_data(&pd);
-    }
-//    read_frame(&pd);
-//    return_data(&pd);
-    qDebug() << "buferrs index " << pd.buf.index;
-    image_raw.loadFromData((const uchar*)pd.buffers[pd.buf.index].start, pd.buffers[pd.buf.index].length);
+    time_start = getCurrentTime("start obt image.");
 
-//    convert_rgb_to_gray_output(&pd);
+    read_frame(&mdate);
+    image_raw.loadFromData((const uchar*)mdate.buffers[mdate.buf.index].start, mdate.buffers[mdate.buf.index].length);
+    return_data(&mdate);
 
-    time_end = getCurrentTime("obt image end.") - time_start;
-    qDebug() << "time delay :" << time_end;
+    time_end = getCurrentTime("obt_image end.") - time_start;
+    qDebug() << "time dealy :" << time_end;
 
-//    image_raw_rgb.loadFromData((const uchar*)pd.outputframe.start, pd.outputframe.length);
-//    image_raw.loadFromData((const uchar*)pd.outputgray.start, pd.outputgray.length);
     QGraphicsScene *originalScene = new QGraphicsScene;
     originalScene->addPixmap(QPixmap::fromImage(image_raw));
     ui->graphicsView->setScene(originalScene);

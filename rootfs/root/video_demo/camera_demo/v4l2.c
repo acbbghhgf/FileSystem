@@ -291,9 +291,9 @@ void init_device(pass_data* s)
         //set stream parameter
     CLEAR(parm);
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    parm.parm.capture.timeperframe.numerator = 60;
-    parm.parm.capture.timeperframe.denominator = 1;
-    printf("set per time fram is 60\n");
+    parm.parm.capture.timeperframe.numerator = 1;
+    parm.parm.capture.timeperframe.denominator = 30;
+    printf("set per time fram is 30\n");
     parm.parm.capture.capturemode = 0;
     if (xioctl (s->fd, VIDIOC_S_FMT, &parm) == -1)
         errno_exit("VIDIOC_S_PARM failed");

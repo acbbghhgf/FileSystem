@@ -23,8 +23,6 @@ public:
     mainWidget(QWidget *parent = nullptr);
     ~mainWidget();
 
-    pass_data pd;
-
 private slots:
     void on_start_pb_clicked();
 
@@ -35,5 +33,7 @@ private slots:
 private:
     Ui::mainWidget *ui;
     unsigned int getCurrentTime(QString str);
+
+    pass_data mdate;
 };
 #endif // MAINWIDGET_H
