@@ -22,7 +22,6 @@ mainWidget::mainWidget(QWidget *parent)
     {
         qDebug() << "open device success.";
     }
-//    start_capturing(&mdate);
 }
 
 mainWidget::~mainWidget()
