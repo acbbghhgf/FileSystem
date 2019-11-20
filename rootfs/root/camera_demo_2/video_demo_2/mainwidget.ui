@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>mainWidget</class>
+ <widget class="QWidget" name="mainWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>mainWidget</string>
+  </property>
+  <widget class="QTextEdit" name="textEdit">
+   <property name="geometry">
+    <rect>
+     <x>490</x>
+     <y>50</y>
+     <width>211</width>
+     <height>321</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QGraphicsView" name="graphicsView">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>50</y>
+     <width>341</width>
+     <height>331</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="start_pb">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>460</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>start</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="stop_pb">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>460</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>stop</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="exit_pb">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>460</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>exit</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="init_pb">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>460</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>init</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
