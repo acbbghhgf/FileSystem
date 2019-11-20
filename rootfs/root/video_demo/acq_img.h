@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include <thread.h>
+#include <pthread.h>
 #include "v4l2_c/v4l2.h"
 #include "core/wwk_type.h"
 #include "core/wwk_uchar.h"
@@ -23,16 +23,16 @@ typedef struct acq_img
 typedef struct acq_img_queue_node
 {
     wwk_uchar_t *store_image;
-    wwk_queue_node_t *n;
+    wwk_queue_node_t n;
 }acq_img_queue_node_t;
 
 
 void acq_main_work(void);
-int acq_image_init(void);
+acq_img_t* acq_image_init(void);
 int acq_image_delete(acq_img_t *a);
 
-int acq_image_work(acq_img_t *a);
-int acq_image_getimag_work(acq_img_t *a, wwk_uchar_t *acq_img);
+int acq_image_work(void *param);
+int acq_image_getimag_work(acq_img_t *a, wwk_uchar_t **acq_img);
 int convert_yuv_to_gray_buffer(unsigned char *yuv, unsigned int yuv_len, unsigned char *gray, unsigned int *gray_len);
 
 void get_current_image(acq_img_t *a);

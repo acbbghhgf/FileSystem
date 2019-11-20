@@ -47,11 +47,6 @@ int init_dev (pass_data *s)
     init_mmap(s);  
     start_capturing(s);
     //save rgb image.
-    s->outputframe.start = malloc(PIX_WIDTH * PIX_HEIGHT * 3 * sizeof (unsigned char)); //yuyv 4:2:2  64 bits per 4 pixels. rgb 24 bits per 1 pixels.
-    s->outputframe.length = PIX_WIDTH * PIX_HEIGHT * 3;
-    //save gray image.
-    s->outputgray.start = malloc(PIX_WIDTH * PIX_WIDTH * sizeof (unsigned char));
-    s->outputgray.length = PIX_WIDTH * PIX_HEIGHT;
 
     fprintf(stdout, "'%s' initialize finish ...\n", s->dev_name);  
     return 0;  
@@ -472,34 +467,34 @@ int convert_yuv_to_rgb_buffer(unsigned char *yuv, unsigned char *rgb, unsigned i
 }  
 
 
-int convert_rgb_to_gray_output(pass_data *s)
-{
-    int ret = -1;
-    unsigned int in = 0, out = 0;
-    unsigned char *rgb_image = (unsigned char *)(s->outputframe.start);
-    if(s->buffers->length == 0 && s->buffers->start != NULL)
-    {
-        goto end;
-    }
+// int convert_rgb_to_gray_output(pass_data *s)
+// {
+//     int ret = -1;
+//     unsigned int in = 0, out = 0;
+//     unsigned char *rgb_image = (unsigned char *)(s->outputframe.start);
+//     if(s->buffers->length == 0 && s->buffers->start != NULL)
+//     {
+//         goto end;
+//     }
 
-    //convert rgb image
-    convert_yuv_to_rgb_buffer((unsigned char *)s->buffers[s->buf.index].start, (unsigned char *)s->outputframe.start, PIX_WIDTH, PIX_HEIGHT);
-    s->outputgray.length = 0;
-//    unsigned char *gray_image = (unsigned char *)(s->outputgray.start);
-    for(out = 0; out < PIX_WIDTH * PIX_HEIGHT; out++)
-    {
-        (*((unsigned char *)(s->outputgray.start) + out)) = ((*(rgb_image+(in++)) * 30) + \
-                                    (*(rgb_image+(in++)) *59) +\
-                                    (*(rgb_image+(in++)) *11)) / 100;
-        ++s->outputgray.length;
-    }
-    if(s->outputgray.length != (PIX_WIDTH * PIX_HEIGHT))
-    {
-        printf("conevrt gray lengeth error.\n");
-        goto end;
-    }
-    ret = 0;
+//     //convert rgb image
+//     convert_yuv_to_rgb_buffer((unsigned char *)s->buffers[s->buf.index].start, (unsigned char *)s->outputframe.start, PIX_WIDTH, PIX_HEIGHT);
+//     s->outputgray.length = 0;
+// //    unsigned char *gray_image = (unsigned char *)(s->outputgray.start);
+//     for(out = 0; out < PIX_WIDTH * PIX_HEIGHT; out++)
+//     {
+//         (*((unsigned char *)(s->outputgray.start) + out)) = ((*(rgb_image+(in++)) * 30) + \
+//                                     (*(rgb_image+(in++)) *59) +\
+//                                     (*(rgb_image+(in++)) *11)) / 100;
+//         ++s->outputgray.length;
+//     }
+//     if(s->outputgray.length != (PIX_WIDTH * PIX_HEIGHT))
+//     {
+//         printf("conevrt gray lengeth error.\n");
+//         goto end;
+//     }
+//     ret = 0;
 
-end:
-    return ret;
-}
+// end:
+//     return ret;
+// }

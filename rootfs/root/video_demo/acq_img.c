@@ -3,15 +3,17 @@
 void acq_main_work(void)
 {
     pthread_t t;
+    int ret = 0;
     wwk_uchar_t *uc_image;
     acq_img_t *a = acq_image_init();
     a->run = 1;
-    pthread_create(&t, acq_image_work, (void *)a);
+    pthread_create(&t, NULL, acq_image_work, (void *)a);
     sleep(5);
     for(;;)
     {
-        acq_image_getimag_work(a, &uc_image);
-        if(uc_image)
+        sleep(1);
+        ret = acq_image_getimag_work(a, &uc_image);
+        if(uc_image && ret != -1)
         {
             wwk_debug("obtin image length : %d\n", uc_image->len);
             wwk_free(uc_image);
@@ -65,10 +67,10 @@ int acq_image_work(void *param)
     }
     while(a->run)
     {
-        read_frame(&m_v4l2);
+        read_frame(&a->m_v4l2);
         //process image
         get_current_image(a);
-        return_data(&m_v4l2);
+        return_data(&a->m_v4l2);
     }
     stop_dev(&a->m_v4l2);
     return 0;
@@ -98,11 +100,10 @@ void get_current_image(acq_img_t *a)
     a->yuv_image = wwk_uchar_dup_data((unsigned char *)a->m_v4l2.buffers[a->m_v4l2.buf.index].start, a->m_v4l2.buffers[a->m_v4l2.buf.index].length);
     //convert yuv to gray.
     acq_img_queue_node_t *node = wwk_malloc(sizeof(*node));
-    node->store_image->data = a->yuv_image->data;
-    node->store_image->len = a->yuv_image->len;
-    a->yuv_image = 0;
+    node->store_image = wwk_uchar_dup_data(a->yuv_image->data, a->yuv_image->len);
+    wwk_free(a->yuv_image);
     //push  queue data
-    wwk_queue_push(a->image_q, node->n);
+    wwk_queue_push(a->image_q, &node->n);
 }
 
 int convert_yuv_to_gray_buffer(unsigned char *yuv, unsigned int yuv_len, unsigned char *gray, unsigned int *gray_len)

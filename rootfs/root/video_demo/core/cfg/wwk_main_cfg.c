@@ -69,7 +69,8 @@ void getValue(char * keyAndValue, char * key, char * value){
 int writeCFG(const char *filename/*in*/, const char *key/*in*/, const char *value/*in*/){
 
 	FILE *pf = NULL;
-	char ftemp[flen] = {0}, fline[1024] = {0}, *fp;    //文件缓存数组
+	int flen = 4096;
+	char ftemp[4096] = {0}, fline[1024] = {0}, *fp;    //文件缓存数组
 	long fsize = 0;
 	int reg = 0;
 	int exit = 0;
@@ -150,7 +151,7 @@ void readCFG(const char *filename, const char *key, const char **value){
 		fclose(pf);
 }
 
-void wwk_readCFG_str(const char *filename, const char *key, wwk_str_t **value)
+void wwk_readCFG_str(const char *filename, const char *key, wwk_string_t **value)
 {
 	FILE *pf = NULL;
 	char line[1024] = {0}, vtemp[1024] = {0};

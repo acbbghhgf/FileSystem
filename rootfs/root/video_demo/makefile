@@ -5,7 +5,7 @@ objs=$(patsubst %.c,%.o, ${src_c})
 OBJ=demo
 
 CC=gcc
-CFLAGS=-I . -O -g
+CFLAGS=-I . -O -g -pthread
 
 all:${OBJ}
 	echo ${OBJ}

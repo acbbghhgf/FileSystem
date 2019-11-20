@@ -1361,7 +1361,8 @@ int wwk_random2(int left,int right)
 	//
 	//t=(int)(xt/100.0);
 	//i=xt%1000;//-(int)(xt/10000)*10000);
-	i=(int)fmod(xt,1000000);
+	// i=(int)fmod(xt,1000000);
+	i = xt / 1000000;
 	//wwk_debug("random=%f/%d\n",xt,i);
 	//wwk_debug("=============xxxxx=============> set xt=%f  i=%d\n",xt,i);
 	//wwk_debug("i=%d xt=%f\n",i,xt);

@@ -77,7 +77,7 @@ void wwk_queue_test(void)
     for (i = 0; i < 5; i++)
     {
         qn = wwk_queue_pop(q);
-        if(!n)
+        if(!qn)
         {
             wwk_debug("node is null.break \n");
             break;

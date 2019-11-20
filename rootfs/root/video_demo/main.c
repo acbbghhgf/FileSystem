@@ -6,12 +6,15 @@
  ************************************************************************/
 
 #include <stdio.h>
-#include <thread.h>
+#include <pthread.h>
 #include "v4l2_c/v4l2.h"
+#include "acq_img.h"
 
 int main()
 {
     printf("hello world\n");
+
+	acq_main_work();
     return 0;
 }
 

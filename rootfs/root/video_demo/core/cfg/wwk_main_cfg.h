@@ -9,7 +9,7 @@
 #define _WWK_MAIN_CFG_H
 
 #include "core/wwk_type.h"
-
+#include "core/wwk_str.h"
 //delete first 
 void trum(char *strIn, char *strOut);
 
