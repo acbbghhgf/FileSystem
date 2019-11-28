@@ -12,6 +12,17 @@ mainWidget::mainWidget(QWidget *parent)
     connect(timer, SIGNAL(timeout()), this, SLOT(update_display()));
 //    timer->start(1000);
 
+    static_data_init();
+
+}
+
+mainWidget::~mainWidget()
+{
+    delete ui;
+}
+
+void mainWidget::static_data_init()
+{
     //init edit
     QRegExp regx("[0-9]+$");
     QValidator *validator = new QRegExpValidator(regx);
@@ -37,11 +48,66 @@ mainWidget::mainWidget(QWidget *parent)
     edit_display_height = 0;
 }
 
-mainWidget::~mainWidget()
+void mainWidget::DataBase_init(void)
 {
-    delete ui;
+    //use default param:
+//    QString dbFile = QFileDialog::getOpenFileName(this, "select database file", "", "SQL Lite database(*.db *.db3)");
+    QString dbFile = DATAFILE;
+    if(dbFile.isEmpty())
+    {
+        qDebug() << "database filename is null.";
+        return;
+    }
+    DB = QSqlDatabase::addDatabase("QSQLITE");// use sqlite3 qt driver
+    DB.setDatabaseName(dbFile);
+
+    if(!DB.open())//open database
+    {
+        qDebug() << "open database " << dbFile << "ERROR.";
+        return;
+    }
+    //open database table
+    open_database_table();
+
 }
 
+void mainWidget::open_database_table()
+{
+    //打开数据表
+    tabModel=new QSqlTableModel(this,DB);//数据表
+    tabModel->setTable("employee"); //设置数据表
+    tabModel->setEditStrategy(QSqlTableModel::OnManualSubmit);//数据保存方式，OnManualSubmit , OnRowChange
+    tabModel->setSort(tabModel->fieldIndex("empNo"),Qt::AscendingOrder); //排序
+    if (!(tabModel->select()))//查询数据
+    {
+        qDebug() << "select data from database error.";
+        return;
+    }
+
+    //字段显示名
+        tabModel->setHeaderData(tabModel->fieldIndex("number"),Qt::Horizontal,"序号");
+        tabModel->setHeaderData(tabModel->fieldIndex("x1"),Qt::Horizontal,"x1");
+        tabModel->setHeaderData(tabModel->fieldIndex("y1"),Qt::Horizontal,"y1");
+        tabModel->setHeaderData(tabModel->fieldIndex("x2"),Qt::Horizontal,"x2");
+
+        tabModel->setHeaderData(tabModel->fieldIndex("y2"),Qt::Horizontal,"y2");
+        tabModel->setHeaderData(tabModel->fieldIndex("yz"),Qt::Horizontal,"yz");
+        tabModel->setHeaderData(tabModel->fieldIndex("width"),Qt::Horizontal,"宽");
+        tabModel->setHeaderData(tabModel->fieldIndex("height"),Qt::Horizontal,"高");
+
+
+        theSelection=new QItemSelectionModel(tabModel);//关联选择模型
+    //theSelection当前项变化时触发currentChanged信号
+        connect(theSelection,SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+                this,SLOT(on_currentChanged(QModelIndex,QModelIndex)));
+    //选择行变化时
+        connect(theSelection,SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
+                this,SLOT(on_currentRowChanged(QModelIndex,QModelIndex)));
+
+        ui->tableView->setModel(tabModel);//设置数据模型
+        ui->tableView->setSelectionModel(theSelection); //设置选择模型
+
+}
 
 void mainWidget::update_display()
 {
@@ -208,4 +274,9 @@ void mainWidget::on_X_edit_textChanged(const QString &arg1)
 void mainWidget::on_Y_edit_textChanged(const QString &arg1)
 {
         edit_display_Y = ui->Y_edit->text().toInt();
+}
+
+void mainWidget::on_db_test_add_clicked()
+{
+    qDebug() << "test db push button.";
 }

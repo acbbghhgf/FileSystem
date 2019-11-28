@@ -8,9 +8,18 @@
 #include <QLabel>
 #include <QDebug>
 #include <QTimer>
+#include <QtSql>
+#include <QDataWidgetMapper>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+
+
+/*
+ * define defaule param, modify ext
+*/
+#define DATAFILE    "/home/ww/ww/test.db"
+#define TMPPICTUREFILE  "save.png"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class mainWidget; }
@@ -51,15 +60,28 @@ private slots:
 
     void on_Y_edit_textChanged(const QString &arg1);
 
+    void on_db_test_add_clicked();
+
 private:
+    void static_data_init(void);
+    void DataBase_init(void);
+    void open_database_table(void);
     void m_updatePixmap(cv::Mat &dst, QImage::Format flag);
 private:
     Ui::mainWidget *ui;
+    //use timer
     QTimer *timer;
     //  自定义单元格Type的类型，在创建单元格的Item时使用
     enum    CellType{ctName=1000,ctSex,ctBirth,ctNation,ctPartyM,ctScore}; //各单元格的类型
     //  各字段在表格中的列号
     enum    FieldColNum{colName=0, colSex,colBirth,colNation,colScore,colPartyM};
+
+    //use database
+    QSqlDatabase DB;//connect database
+    QSqlTableModel *tabModel; //data modle
+    QItemSelectionModel *theSelection; //选择模型
+    QDataWidgetMapper   *dataMapper; //数据映射
+
 
     //picture filename path
     QString pictrue_path;
