@@ -11,7 +11,7 @@ mainWidget::mainWidget(QWidget *parent)
     timer = new QTimer;
     connect(timer, SIGNAL(timeout()), this, SLOT(update_display()));
 //    timer->start(1000);
-
+    tableview_init();
     static_data_init();
 
 }
@@ -19,6 +19,80 @@ mainWidget::mainWidget(QWidget *parent)
 mainWidget::~mainWidget()
 {
     delete ui;
+}
+
+void mainWidget::tableview_init(void)
+{
+    //使用tableview
+    model = new QStandardItemModel();
+    model->setColumnCount(9);
+    model->setHeaderData(0, Qt::Horizontal, QString::fromLocal8Bit("region"));
+    model->setHeaderData(1, Qt::Horizontal, QString::fromLocal8Bit("x1"));
+    model->setHeaderData(2, Qt::Horizontal, QString::fromLocal8Bit("y1"));
+    model->setHeaderData(3, Qt::Horizontal, QString::fromLocal8Bit("x2"));
+    model->setHeaderData(4, Qt::Horizontal, QString::fromLocal8Bit("y2"));
+    model->setHeaderData(5, Qt::Horizontal, QString::fromLocal8Bit("yz"));
+    model->setHeaderData(6, Qt::Horizontal, QString::fromLocal8Bit("width"));
+    model->setHeaderData(7, Qt::Horizontal, QString::fromLocal8Bit("height"));
+    model->setHeaderData(8, Qt::Horizontal, QString::fromLocal8Bit("ID"));
+    ui->tableView->setModel(model);
+    //表头信息显示居左
+    ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignCenter);
+    //设置列宽不可变
+    ui->tableView->setColumnWidth(0,20);
+    ui->tableView->setColumnWidth(1,20);
+    ui->tableView->setColumnWidth(2,20);
+    ui->tableView->setColumnWidth(3,20);
+    ui->tableView->setColumnWidth(4,20);
+    ui->tableView->setColumnWidth(5,20);
+    ui->tableView->setColumnWidth(6,20);
+    ui->tableView->setColumnWidth(7,20);
+    ui->tableView->setColumnWidth(8,20);
+}
+
+void mainWidget::tableview_data_clear(void)
+{
+    model->clear();
+    model->setColumnCount(9);
+    model->setHeaderData(0, Qt::Horizontal, QString::fromLocal8Bit("region"));
+    model->setHeaderData(1, Qt::Horizontal, QString::fromLocal8Bit("x1"));
+    model->setHeaderData(2, Qt::Horizontal, QString::fromLocal8Bit("y1"));
+    model->setHeaderData(3, Qt::Horizontal, QString::fromLocal8Bit("x2"));
+    model->setHeaderData(4, Qt::Horizontal, QString::fromLocal8Bit("y2"));
+    model->setHeaderData(5, Qt::Horizontal, QString::fromLocal8Bit("yz"));
+    model->setHeaderData(6, Qt::Horizontal, QString::fromLocal8Bit("width"));
+    model->setHeaderData(7, Qt::Horizontal, QString::fromLocal8Bit("height"));
+    model->setHeaderData(8, Qt::Horizontal, QString::fromLocal8Bit("ID"));
+    ui->tableView->setModel(model);
+    //表头信息显示居左
+    ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignCenter);
+    //设置列宽不可变
+    ui->tableView->setColumnWidth(0,20);
+    ui->tableView->setColumnWidth(1,20);
+    ui->tableView->setColumnWidth(2,20);
+    ui->tableView->setColumnWidth(3,20);
+    ui->tableView->setColumnWidth(4,20);
+    ui->tableView->setColumnWidth(5,20);
+    ui->tableView->setColumnWidth(6,20);
+    ui->tableView->setColumnWidth(7,20);
+    ui->tableView->setColumnWidth(8,20);
+}
+
+void mainWidget::tableview_add_item(int region_value, int x1_value, int y1_value, int x2_value, int y2_value, int yz_value, int width_value, int height_value, int id_value)
+{
+
+    //add model item value
+    QList<QStandardItem*> mlist;
+    mlist.append(new QStandardItem(QString("%1").arg(region_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(x1_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(y1_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(x2_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(y2_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(yz_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(width_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(height_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(id_value)));
+    model->appendRow(mlist);
 }
 
 void mainWidget::static_data_init()
@@ -50,63 +124,45 @@ void mainWidget::static_data_init()
 
 void mainWidget::DataBase_init(void)
 {
-    //use default param:
-//    QString dbFile = QFileDialog::getOpenFileName(this, "select database file", "", "SQL Lite database(*.db *.db3)");
-    QString dbFile = DATAFILE;
-    if(dbFile.isEmpty())
-    {
-        qDebug() << "database filename is null.";
-        return;
-    }
-    DB = QSqlDatabase::addDatabase("QSQLITE");// use sqlite3 qt driver
-    DB.setDatabaseName(dbFile);
-
-    if(!DB.open())//open database
-    {
-        qDebug() << "open database " << dbFile << "ERROR.";
-        return;
-    }
-    //open database table
     open_database_table();
-
 }
 
 void mainWidget::open_database_table()
 {
     //打开数据表
-    tabModel=new QSqlTableModel(this,DB);//数据表
-    tabModel->setTable("employee"); //设置数据表
-    tabModel->setEditStrategy(QSqlTableModel::OnManualSubmit);//数据保存方式，OnManualSubmit , OnRowChange
-    tabModel->setSort(tabModel->fieldIndex("empNo"),Qt::AscendingOrder); //排序
-    if (!(tabModel->select()))//查询数据
-    {
-        qDebug() << "select data from database error.";
-        return;
-    }
+    qDebug() << "qsqldatabase::drivers = " << QSqlDatabase::drivers();
+    db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName(DATAFILE);
+    db.setUserName("root");
+    db.setPassword("123456");
+}
 
-    //字段显示名
-        tabModel->setHeaderData(tabModel->fieldIndex("number"),Qt::Horizontal,"序号");
-        tabModel->setHeaderData(tabModel->fieldIndex("x1"),Qt::Horizontal,"x1");
-        tabModel->setHeaderData(tabModel->fieldIndex("y1"),Qt::Horizontal,"y1");
-        tabModel->setHeaderData(tabModel->fieldIndex("x2"),Qt::Horizontal,"x2");
-
-        tabModel->setHeaderData(tabModel->fieldIndex("y2"),Qt::Horizontal,"y2");
-        tabModel->setHeaderData(tabModel->fieldIndex("yz"),Qt::Horizontal,"yz");
-        tabModel->setHeaderData(tabModel->fieldIndex("width"),Qt::Horizontal,"宽");
-        tabModel->setHeaderData(tabModel->fieldIndex("height"),Qt::Horizontal,"高");
-
-
-        theSelection=new QItemSelectionModel(tabModel);//关联选择模型
-    //theSelection当前项变化时触发currentChanged信号
-        connect(theSelection,SIGNAL(currentChanged(QModelIndex,QModelIndex)),
-                this,SLOT(on_currentChanged(QModelIndex,QModelIndex)));
-    //选择行变化时
-        connect(theSelection,SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
-                this,SLOT(on_currentRowChanged(QModelIndex,QModelIndex)));
-
-        ui->tableView->setModel(tabModel);//设置数据模型
-        ui->tableView->setSelectionModel(theSelection); //设置选择模型
-
+void mainWidget::create_datebase_table(void)
+{
+    bool isOk = db.open();
+        if(!isOk){
+            qDebug()<<"error info :"<<db.lastError();
+        }
+        else{
+            QSqlQuery query;
+    //        query=QSqlQuery::QSqlQuery(db);
+            QString creatTableStr = "CREATE TABLE test\
+                    (                                       \
+                        cust_id      char(10),     \
+                        cust_name    char(250) \
+                        );";
+            query.prepare(creatTableStr);
+            if(!query.exec()){
+                qDebug()<<"query error :"<<query.lastError();
+                query.finish();
+    //            db.close();
+            }
+            else{
+                qDebug()<<"creat table success!";
+                query.finish();
+            }
+        }
+    //    db.close();
 }
 
 void mainWidget::update_display()
@@ -131,28 +187,14 @@ void mainWidget::update_display()
 void mainWidget::on_setHeader_pb_clicked()
 {
     //设置表头
-        QTableWidgetItem    *headerItem;
-        QStringList headerText;
-        headerText<<"序 号"<<"X1"<<"Y1"<<"X2"<<"Y2"<<"YZ"<<"theshold";  //表头标题用QStringList来表示
-        ui->tableInfo->setHorizontalHeaderLabels(headerText);
-        ui->tableInfo->setColumnCount(headerText.count());//列数设置为与 headerText的行数相等
-        for (int i=0;i<ui->tableInfo->columnCount();i++)//列编号从0开始
-        {
-           headerItem=new QTableWidgetItem(headerText.at(i)); //新建一个QTableWidgetItem， headerText.at(i)获取headerText的i行字符串
-           QFont font=headerItem->font();//获取原有字体设置
-           font.setBold(true);//设置为粗体
-           font.setPointSize(8);//字体大小
-           headerItem->setTextColor(Qt::red);//字体颜色
-           headerItem->setFont(font);//设置字体
-           ui->tableInfo->setHorizontalHeaderItem(i,headerItem); //设置表头单元格的Item
-        }
-
-//        ui->tableInfo->setItemDelegateForColumn(colScore,&spinDelegate);//设置自定义代理组件
+    qDebug() << "set header push button.";
 }
 
 void mainWidget::on_exit_pb_clicked()
 {
     qDebug() << "process exit.";
+    if(db.isOpen())
+        db.close();
     this->close();
 }
 
@@ -180,8 +222,8 @@ void mainWidget::on_select_pb_clicked()
     edit_display_y1 = 0;
     edit_display_y2 = process_mid_picture.rows;
     edit_display_yz = 49;
-    edit_display_width = 40;
-    edit_display_height = 24;
+    edit_display_width = 1;
+    edit_display_height = 1;
 
     qDebug() << "proc_cols = " << process_mid_picture.cols << " proc_rows = " << process_mid_picture.rows;
     m_updatePixmap(process_mid_picture, QImage::Format_RGB888);
@@ -195,13 +237,58 @@ void mainWidget::m_updatePixmap(cv::Mat &dst, QImage::Format flag)
 
     originalScene.clear();
     cv::Mat process = dst.clone();
-    cv::Rect rect(edit_display_x1, edit_display_y1, edit_display_x2 - edit_display_x1, edit_display_y2 - edit_display_y1);
-    cv::rectangle(process, rect, cv::Scalar(255, 0, 0), 1, 8, 0);
+//    cv::Rect rect(edit_display_x1, edit_display_y1, edit_display_x2 - edit_display_x1, edit_display_y2 - edit_display_y1);
+//    cv::rectangle(process, rect, cv::Scalar(255, 0, 0), 1, 8, 0);
+    cv::rectangle(process, cv::Point(edit_display_x1, edit_display_y1), cv::Point(edit_display_x2, edit_display_y2), cv::Scalar(255, 0, 0), 1, 8, 0);
+//    cv::line(process, cv::Point(edit_display_x1+50, edit_display_y1), cv::Point(edit_display_x1+50, edit_display_y2), cv::Scalar(255, 0, 0), 1, 8, 0);
     cv::imwrite("/home/ww/bmp_demo/save.png", process);
     qDebug() << "proc_cols = " << dst.cols << " proc_rows = " << dst.rows << "graphic width =" << graphicsView_width << " graphic height =" << graphicsView_height;
     QImage image("/home/ww/bmp_demo/save.png");
     pixmap = QPixmap::fromImage(image);
     originalScene.addPixmap(pixmap.scaled(graphicsView_width, graphicsView_height, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+}
+
+void mainWidget::m_update_Onepartition_Pixmap(cv::Mat &dst, QImage::Format flag, int width_value, int width_num, int height_value, int height_num)
+{
+    int x1[width_num][height_num];
+    int x2[width_num][height_num];
+    int y1[width_num][height_num];
+    int y2[width_num][height_num];
+    originalScene.clear();
+    cv::Mat process = dst.clone();
+    cv::rectangle(process, cv::Point(edit_display_x1, edit_display_y1), cv::Point(edit_display_x2, edit_display_y2), cv::Scalar(0, 0, 255), 1, 8, 0);
+    for(int i = 0; i < width_num; i++){
+        cv::line(process, cv::Point(edit_display_x1 + i * width_value, edit_display_y1), cv::Point(edit_display_x1 + i *width_value, edit_display_y2), cv::Scalar(0, 0, 255), 1, 8, 0);
+        for(int j = 0; j < height_num; j++)
+        {
+            x1[i][j] = edit_display_x1 + (i-1) *width_value;
+            x2[i][j] = edit_display_x1 + i* width_value;
+        }
+    }
+    for(int i = 0; i < height_num; i++){
+        cv::line(process, cv::Point(edit_display_x1, edit_display_y1 + i * height_value), cv::Point(edit_display_x2, edit_display_y1 + i * height_value), cv::Scalar(0, 0, 255), 1, 8, 0);
+        for(int j = 0; j < height_num; j++)
+        {
+            y1[i][j] = edit_display_x1 + (i-1) *width_value;
+            y2[i][j] = edit_display_x1 + i* width_value;
+        }
+    }
+    cv::imwrite("/home/ww/bmp_demo/save.png", process);
+    QImage image("/home/ww/bmp_demo/save.png");
+    pixmap = QPixmap::fromImage(image);
+    originalScene.addPixmap(pixmap.scaled(graphicsView_width, graphicsView_height, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+    //add tableview data
+
+    tableview_data_clear();
+    for(int i = 0 ; i <= width_num; i++)
+    {
+        for(int j = 0; j <= height_num; j++)
+        {
+            tableview_add_item(i+j, x1[i][j], y1[i][j], x2[i][j], y2[i][j], edit_display_yz, 1, 1, i+j);
+        }
+    }
 
 }
 
@@ -227,6 +314,8 @@ void mainWidget::on_modify_pb_clicked()
         tmp_height = edit_display_y2 - edit_display_y1;
 
 //    process_mid_picture = process_mid_picture(cv::Rect(tmp_x1, tmp_y1, tmp_width, tmp_height));
+    tableview_data_clear();
+    tableview_add_item(0, edit_display_x1, edit_display_y1, edit_display_x2, edit_display_y2, edit_display_width, edit_display_yz, edit_display_width, edit_display_height);
     m_updatePixmap(process_mid_picture, QImage::Format_Grayscale8);
     update_display();
 }
@@ -279,4 +368,14 @@ void mainWidget::on_Y_edit_textChanged(const QString &arg1)
 void mainWidget::on_db_test_add_clicked()
 {
     qDebug() << "test db push button.";
+}
+
+void mainWidget::on_one_click_partition_pb_clicked()
+{
+    int width_value = (edit_display_x2 - edit_display_x1) / edit_display_width;
+    int height_value = (edit_display_y2 - edit_display_y1) / edit_display_height;
+
+    m_update_Onepartition_Pixmap(process_mid_picture, QImage::Format_RGB888, width_value, edit_display_width, height_value, edit_display_height);
+
+    update_display();
 }

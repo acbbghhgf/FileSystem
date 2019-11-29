@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <QtSql>
+#include <QStandardItemModel>
 #include <QDataWidgetMapper>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
@@ -17,9 +18,21 @@
 
 /*
  * define defaule param, modify ext
+ *
 */
-#define DATAFILE    "/home/ww/ww/test.db"
+#define DATAFILE    "testDB.db"
 #define TMPPICTUREFILE  "save.png"
+#define CREATE_SQL  "create table test (id int primary key, name varchar(30), age int)"
+#define INSERT_SQL  "insert into test values (?, ?, ?)"
+#define SELECT_SQL  "select id, name from test"
+#define UPDATE_SQL  "update test"
+#define CLEAR_SQL   "delete from test"
+#define DELETE_SQL  "delete from test where id = ?"
+#define DROP_SQL    "drop table test"
+
+#define SPILT_WIDTH 40
+#define SPILT_HEIGHT 24
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class mainWidget; }
@@ -62,11 +75,21 @@ private slots:
 
     void on_db_test_add_clicked();
 
+    void on_one_click_partition_pb_clicked();
+
 private:
     void static_data_init(void);
     void DataBase_init(void);
     void open_database_table(void);
+    void create_datebase_table(void);
+
     void m_updatePixmap(cv::Mat &dst, QImage::Format flag);
+    void m_update_Onepartition_Pixmap(cv::Mat &dst, QImage::Format flag, int width_value, int width_num, int height_value, int height_num);
+
+    void tableview_init(void);
+    void tableview_data_clear(void);
+    void tableview_add_item(int region_value, int x1_value, int y1_value, int x2_value, int y2_value, int yz_value, int width_value, int height_value, int id_value);
+
 private:
     Ui::mainWidget *ui;
     //use timer
@@ -77,10 +100,10 @@ private:
     enum    FieldColNum{colName=0, colSex,colBirth,colNation,colScore,colPartyM};
 
     //use database
-    QSqlDatabase DB;//connect database
-    QSqlTableModel *tabModel; //data modle
-    QItemSelectionModel *theSelection; //选择模型
-    QDataWidgetMapper   *dataMapper; //数据映射
+    QSqlDatabase db;//connect database
+
+    //display table data
+    QStandardItemModel *model;
 
 
     //picture filename path
