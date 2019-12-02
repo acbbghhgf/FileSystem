@@ -14,6 +14,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#include "picture_data.h"
 
 
 /*
@@ -47,8 +48,6 @@ public:
     ~mainWidget();
 
 private slots:
-    void on_setHeader_pb_clicked();
-
     void on_exit_pb_clicked();
     void on_select_pb_clicked();
     void update_display();
@@ -73,9 +72,23 @@ private slots:
 
     void on_Y_edit_textChanged(const QString &arg1);
 
-    void on_db_test_add_clicked();
-
     void on_one_click_partition_pb_clicked();
+
+    void on_two_partition_pb_clicked();
+
+    void on_db_open_pb_clicked();
+
+    void on_db_create_pb_clicked();
+
+    void on_db_select_pb_clicked();
+
+    void on_db_drop_pb_clicked();
+
+    void on_training_pb_clicked();
+
+    void on_generate_partition_pb_clicked();
+
+    void on_load_partition_pb_clicked();
 
 private:
     void static_data_init(void);
@@ -83,21 +96,18 @@ private:
     void open_database_table(void);
     void create_datebase_table(void);
 
-    void m_updatePixmap(cv::Mat &dst, QImage::Format flag);
+    void m_updatePixmap(cv::Mat &dst);
     void m_update_Onepartition_Pixmap(cv::Mat &dst, QImage::Format flag, int width_value, int width_num, int height_value, int height_num);
 
     void tableview_init(void);
     void tableview_data_clear(void);
-    void tableview_add_item(int region_value, int x1_value, int y1_value, int x2_value, int y2_value, int yz_value, int width_value, int height_value, int id_value);
+    void tableview_add_item(QString region_value, int x1_value, int y1_value, int x2_value, int y2_value, int yz_value, int width_value, int height_value, int id_value);
 
+    int update_database_threshold(cv::Mat &src, QString &pic_data, int pic_num);
 private:
     Ui::mainWidget *ui;
     //use timer
     QTimer *timer;
-    //  自定义单元格Type的类型，在创建单元格的Item时使用
-    enum    CellType{ctName=1000,ctSex,ctBirth,ctNation,ctPartyM,ctScore}; //各单元格的类型
-    //  各字段在表格中的列号
-    enum    FieldColNum{colName=0, colSex,colBirth,colNation,colScore,colPartyM};
 
     //use database
     QSqlDatabase db;//connect database
@@ -116,6 +126,11 @@ private:
 
     int graphicsView_width;
     int graphicsView_height;
+    int one_partiton_width_coe;
+    int ope_partition_height_coe;
+    int two_partition_width_coe;
+    int two_partition_height_coe;
+
     //display scope x and y
     int edit_display_x1;
     int edit_display_x2;
@@ -127,6 +142,11 @@ private:
     int edit_display_Y;
     int edit_display_width;
     int edit_display_height;
+
+    int x1_gen_part_value[SPILT_WIDTH][SPILT_HEIGHT];
+    int y1_gen_part_value[SPILT_WIDTH][SPILT_HEIGHT];
+    int x2_gen_part_value[SPILT_WIDTH][SPILT_HEIGHT];
+    int y2_gen_part_value[SPILT_WIDTH][SPILT_HEIGHT];
 
     //src picture
     cv::Mat src_picture;
