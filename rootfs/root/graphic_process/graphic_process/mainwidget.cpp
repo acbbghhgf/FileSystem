@@ -13,6 +13,7 @@ mainWidget::mainWidget(QWidget *parent)
 //    timer->start(1000);
     tableview_init();
     static_data_init();
+    init_serial_port();
 
 }
 
@@ -495,17 +496,20 @@ void mainWidget::on_db_create_pb_clicked()
                         yz int, \
                         black_threshold_1 int, \
                         white_threshold_1 int, \
-                        second_threshold_1 int \
+                        second_threshold_1 int, \
                         black_threshold_2 int, \
                         white_threshold_2 int, \
-                        second_threshold_2 int \
+                        second_threshold_2 int, \
                         black_threshold_4 int, \
                         white_threshold_4 int, \
-                        second_threshold_4 int \
+                        second_threshold_4 int, \
                         black_threshold_8 int, \
                         white_threshold_8 int, \
-                        second_threshold_8 int \
-                        );";
+                        second_threshold_8 int, \
+                        judge_1 int, \
+                        judge_2 int, \
+                        judge_4 int, \
+                        judge_8 int);";
             query.prepare(creatTableStr);
             if(!query.exec()){
                 qDebug()<<"query error :"<<query.lastError();
@@ -654,18 +658,230 @@ void mainWidget::on_db_drop_pb_clicked()
 
 void mainWidget::on_training_pb_clicked()
 {
-    make_picture_data(SPILT_HEIGHT, SPILT_WIDTH);
+    cv::Mat gray_src = cv::Mat::zeros(src_picture.size(), src_picture.type());
+    cv::cvtColor(src_picture, gray_src, cv::COLOR_BGR2GRAY);
+    update_database_threshold(gray_src, 18);
 }
 
 
-int mainWidget::update_database_threshold(cv::Mat &src, QString &pic_data, int pic_num)
+int mainWidget::update_database_threshold(cv::Mat &src, int pic_num)
 {
+    QSqlQuery query;
     //src input black and white threshold.
-    QString pic_data_ch = get_pic_data(pic_num);
-    QByteArray pic_data_byte = QByteArray::fromBase64(pic_data_ch.toLocal8Bit());
-    for(int i = 0; i< pic_data_byte.size(); ++i)
+    QString pic_data_ch = get_pic_data(SPILT_HEIGHT, SPILT_WIDTH, pic_num);
+    QByteArray pic_data_byte = pic_data_ch.toLatin1();
+
+    unsigned char *data = src.data;
+    int step = src.step;
+    qDebug() << "pic_data.size = " << pic_data_byte.length();
+
+    for(int i = 0; i< pic_data_byte.length(); ++i)
     {
+        unsigned char ch = pic_data_byte[i];
+//        qDebug() << "ch = " << ch;
+        pic_parse_t ch_parse;
+        bzero(&ch_parse, sizeof(ch_parse));
         //process data base and update data base black and white
+        for(int n = 0; n < 2; ++n)
+        {
+            if(n%2 == 0)
+            {
+                if(ch & 0x80)
+                    ch_parse.c8 = 1;
+                else
+                    ch_parse.c8 = 0;
+                if(ch & 0x40)
+                    ch_parse.c4 = 1;
+                else
+                    ch_parse.c4 = 0;
+                if(ch & 0x20)
+                    ch_parse.c2 = 1;
+                else
+                    ch_parse.c2 = 0;
+                if(ch & 0x10)
+                    ch_parse.c1 = 1;
+                else
+                    ch_parse.c1 = 0;
+            }
+            else
+            {
+                if(ch & 0x08)
+                    ch_parse.c8 = 1;
+                else
+                    ch_parse.c8 = 0;
+                if(ch & 0x04)
+                    ch_parse.c4 = 1;
+                else
+                    ch_parse.c4 = 0;
+                if(ch & 0x02)
+                    ch_parse.c2 = 1;
+                else
+                    ch_parse.c2 = 0;
+                if(ch & 0x01)
+                    ch_parse.c1 = 1;
+                else
+                    ch_parse.c1 = 0;
+            }
+            //select x1 y1 and counter
+            int field_id = -1;
+            int x1_value = 0;
+            int y1_value = 0;
+            int x2_value = 0;
+            int y2_value = 0;
+            int yz_value = 0;
+            int black_threshold_1 = 0;
+            int white_threshold_1 = 0;
+            int second_threshold_1 = 0;
+            int black_threshold_2 = 0;
+            int white_threshold_2 = 0;
+            int second_threshold_2 = 0;
+            int black_threshold_4 = 0;
+            int white_threshold_4 = 0;
+            int second_threshold_4 = 0;
+            int black_threshold_8 = 0;
+            int white_threshold_8 = 0;
+            int second_threshold_8 = 0;
+            QString select_sql = QString("select * from test where field_id == %1").arg(2*i+n);
+            qDebug() << "select sql = " << select_sql;
+            query.prepare(select_sql);
+            if(!query.exec())
+            {
+                qDebug() << "not select field_id = " << 2*i +n;
+                qDebug()<<query.lastError();
+                query.finish();
+                continue;
+            }
+            else
+            {
+                if(query.first())
+                {
+                    field_id = query.value(0).toInt();
+                    x1_value = query.value(1).toInt();
+                    y1_value = query.value(2).toInt();
+                    x2_value = query.value(3).toInt();
+                    y2_value = query.value(4).toInt();
+                    yz_value = query.value(5).toInt();
+                    black_threshold_1 = query.value(6).toInt() ? query.value(6).toInt() : 0;
+                    white_threshold_1 = query.value(7).toInt() ? query.value(7).toInt() : 0;
+                    second_threshold_1 = query.value(8).toInt() ? query.value(8).toInt() : 0;
+                    black_threshold_2 = query.value(9).toInt() ? query.value(9).toInt() : 0;
+                    white_threshold_2 = query.value(10).toInt() ? query.value(10).toInt() : 0;
+                    second_threshold_2 = query.value(11).toInt() ? query.value(11).toInt() : 0;
+                    black_threshold_4 = query.value(12).toInt() ? query.value(12).toInt() : 0;
+                    white_threshold_4 = query.value(13).toInt() ? query.value(13).toInt() : 0;
+                    second_threshold_4 = query.value(14).toInt() ? query.value(14).toInt() : 0;
+                    black_threshold_8 = query.value(15).toInt() ? query.value(15).toInt() : 0;
+                    white_threshold_8 = query.value(16).toInt() ? query.value(16).toInt() : 0;
+                    second_threshold_8 = query.value(17).toInt() ? query.value(17).toInt() : 0;
+                }
+                else{
+                    qDebug() << "query null is " << 2*i +n;
+                    query.finish();
+                    continue;
+                }
+                query.finish();
+                int dx = (x2_value - x1_value) /2;
+                int dy = (y2_value - y1_value) /2;
+
+                for(int j = 0; j < 4; j++)
+                {
+                    int cs, ys;
+                    cs = j /2;
+                    ys = j%2;
+                    int pcount = 0;
+                    for(int m = y1_value + cs *dy; m <= y1_value +(cs + 1)*dy; m++)
+                    {
+                        for(int k = x1_value + ys *dx; k <= x1_value + (ys+1)*dx; k++)
+                        {
+                            int din = m * step + k;
+                            if(data[din] < yz_value)
+                                pcount++;
+                        }
+                    }
+                    switch (j) {
+                    case 0:
+                        if(ch_parse.c1)
+                            ch_parse.counter_black_c1 = pcount;
+                        else
+                            ch_parse.counter_white_c1 = pcount;
+                        break;
+                    case 1:
+                        if(ch_parse.c2)
+                            ch_parse.counter_black_c2 = pcount;
+                        else
+                            ch_parse.counter_white_c2 = pcount;
+                        break;
+                    case 2:
+                        if(ch_parse.c4)
+                            ch_parse.counter_black_c4 = pcount;
+                        else
+                            ch_parse.counter_white_c4 = pcount;
+                        break;
+                    case 3:
+                        if(ch_parse.c8)
+                            ch_parse.counter_black_c8 = pcount;
+                        else
+                            ch_parse.counter_white_c8 = pcount;
+                        break;
+                    }
+                }
+                // bi jiao threshold counter
+                if((black_threshold_1 > ch_parse.counter_black_c1 && ch_parse.counter_black_c1 !=0) || black_threshold_1 == 0)
+                    black_threshold_1 = ch_parse.counter_black_c1;
+                if(white_threshold_1 < ch_parse.counter_white_c1 || white_threshold_1 == 0)
+                    white_threshold_1 = ch_parse.counter_white_c1;
+                if((black_threshold_2 > ch_parse.counter_black_c2 && ch_parse.counter_black_c2 != 0) || black_threshold_2 == 0)
+                    black_threshold_2 = ch_parse.counter_black_c2;
+                if(white_threshold_2 < ch_parse.counter_white_c2 || white_threshold_2 == 0)
+                    white_threshold_2 = ch_parse.counter_white_c2;
+                if((black_threshold_4 > ch_parse.counter_black_c4 && ch_parse.counter_black_c4 != 0) || black_threshold_4 == 0)
+                    black_threshold_4 = ch_parse.counter_black_c4;
+                if(white_threshold_4 < ch_parse.counter_white_c4 || white_threshold_4 == 0)
+                    white_threshold_4 = ch_parse.counter_white_c4;
+                if((black_threshold_8 > ch_parse.counter_black_c8 && ch_parse.counter_black_c8 != 0) || black_threshold_8 == 0)
+                    black_threshold_8 = ch_parse.counter_black_c8;
+                if(white_threshold_8 < ch_parse.counter_white_c8 || white_threshold_8 == 0)
+                    white_threshold_8 = ch_parse.counter_white_c8;
+            }
+
+            QString update_sql_threshold = "update test set \
+                    black_threshold_1 = :black_threshold_1, \
+                    white_threshold_1 = :white_threshold_1, \
+                    black_threshold_2 = :black_threshold_2, \
+                    white_threshold_2 = :white_threshold_2, \
+                    black_threshold_4 = :black_threshold_4, \
+                    white_threshold_4 = :white_threshold_4, \
+                    black_threshold_8 = :black_threshold_8, \
+                    white_threshold_8 = :white_threshold_8  where field_id = :field_id;";
+
+
+            query.clear();
+
+            query.prepare(update_sql_threshold);
+            query.bindValue(":black_threshold_1", black_threshold_1);
+            query.bindValue(":white_threshold_1", white_threshold_1);
+
+            query.bindValue(":black_threshold_2", black_threshold_2);
+            query.bindValue(":white_threshold_2", white_threshold_2);
+
+            query.bindValue(":black_threshold_4", black_threshold_4);
+            query.bindValue(":white_threshold_4", white_threshold_4 );
+
+            query.bindValue(":black_threshold_8", black_threshold_8);
+            query.bindValue(":white_threshold_8", white_threshold_8);
+            query.bindValue(":field_id", field_id);
+            if(!query.exec())
+            {
+                qDebug() << query.executedQuery();
+                qDebug() << "update field_id error -- 8, field_id = " << field_id;
+                qDebug()<< query.lastError();
+            }
+            else
+            {
+                qDebug()<<"updated!";
+            }
+            query.finish();
+        }
     }
 }
 
@@ -730,4 +946,125 @@ void mainWidget::on_load_partition_pb_clicked()
     }
     qDebug() << "data base insert counter = " << counter;
 
+}
+
+void mainWidget::on_train_threshold_pb_clicked()
+{
+    QSqlQuery query;
+    QString update_threshold = "update test set \
+            second_threshold_1 = (black_threshold_1 + white_threshold_1) /2,\
+            second_threshold_2 = (black_threshold_2 + white_threshold_2) /2,\
+            second_threshold_4 = (black_threshold_4 + white_threshold_4) /2,\
+            second_threshold_8 = (black_threshold_8 + white_threshold_8) /2;";
+
+    query.prepare(update_threshold);
+    if(!query.exec())
+    {
+        qDebug() << query.executedQuery();
+        qDebug() << "up second threshold error.";
+        qDebug()<<query.lastError();
+    }
+    else
+        qDebug() << "update threshold success.";
+    query.finish();
+
+    //update model judge value
+    QString update_judge = "update test set \
+            judge_1 = (black_threshold_1 - white_threshold_1),\
+            judge_2 = (black_threshold_2 - white_threshold_2),\
+            judge_4 = (black_threshold_4 - white_threshold_4),\
+            judge_8 = (black_threshold_8 - white_threshold_8);";
+
+    query.prepare(update_judge);
+    if(!query.exec())
+    {
+        qDebug() << query.executedQuery();
+        qDebug() << "up second threshold error.";
+        qDebug()<<query.lastError();
+    }
+    else
+        qDebug() << "update judge success.";
+    query.finish();
+}
+
+void mainWidget::on_open_comm_pb_clicked()
+{
+    if(!comm_open_flag)
+    {// open serial comm ops
+        if(m_serial_name != ui->comm_box->currentText())
+        {
+            if(m_serial)
+                delete m_serial;
+            qDebug() << "close current serial port name = " << m_serial_name;
+        }
+        m_serial = new usbserial;
+        comm_open_flag = true;
+        ui->open_comm_pb->setText("close comm");
+    }
+    else
+    {
+        // close serial comm ops
+        if(m_serial)
+            delete m_serial;
+        comm_open_flag = false;
+        ui->open_comm_pb->setText("open comm");
+    }
+}
+
+
+void mainWidget::init_serial_port(void)
+{
+    comm_open_flag = false;
+    const auto infos = QSerialPortInfo::availablePorts();
+    for(const QSerialPortInfo &info : infos)
+    {
+        ui->comm_box->addItem(info.portName());
+    }
+}
+
+void mainWidget::on_open_CCD_pb_clicked()
+{
+    std::string commnd;
+    std::string commnd_lowercase;
+    if(!ccd_open_flag)
+    {
+        ccd_open_flag = true;
+        ui->open_CCD_pb->setText("close CCD");
+        //TODO 串口指令写入 u_serial.send(commnd,commnd.size());
+        commnd.clear();
+        commnd = "NO";
+        m_serial->send(const_cast<char *>(commnd.c_str()), commnd.size());
+        qDebug() << "open ccd and send serial COMAND = NO;";
+        usleep(300);
+
+        m_videoCapture = cv::VideoCapture(0);
+        if (!m_videoCapture.isOpened())
+        {
+          qDebug() << "open camera failed.";
+        }
+    }
+    else
+    {
+        ccd_open_flag = false;
+        ui->open_CCD_pb->setText("open CCD");
+
+        commnd_lowercase.clear();
+        commnd_lowercase = "no";
+        m_serial->send(const_cast<char *>(commnd_lowercase.c_str()), commnd_lowercase.size());
+        qDebug() << "open ccd and send serial COMAND = no;";
+        usleep(300);
+
+        m_videoCapture.release();
+    }
+}
+
+void mainWidget::init_ccd_dev(void)
+{
+    ccd_open_flag = false;
+}
+
+void mainWidget::on_get_picture_pb_clicked()
+{
+    //display_model(cv::VideoCapture& v_capture, usbserial &u_serial)
+    display_model(m_videoCapture, *m_serial);
 }

@@ -1,4 +1,4 @@
-QT       += core gui sql
+QT       += core gui sql serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,10 +16,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    huhu.cpp \
     main.cpp \
-    mainwidget.cpp
+    mainwidget.cpp \
+    picture_data.cpp \
+    usbserial.cpp
 
-HEADERS += mainwidget.h
+HEADERS += mainwidget.h \
+    huhu.h \
+    picture_data.h \
+    usbserial.h
 
 
 FORMS += \
@@ -32,6 +38,10 @@ LIBS += -I /usr/local/  \
         -lopencv_core \
         -lopencv_video \
         -lopencv_imgproc
+
+
+QMAKE_CXXFLAGS += -std=c++0x
+QMAKE_CFLAGS += -std=c99
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

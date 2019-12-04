@@ -5,6 +5,8 @@
 #include <QFileDialog>
 #include <QPixmap>
 #include <QGraphicsScene>
+#include <QtSerialPort/QSerialPort>
+#include <QSerialPortInfo>
 #include <QLabel>
 #include <QDebug>
 #include <QTimer>
@@ -15,6 +17,8 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include "picture_data.h"
+#include "usbserial.h"
+#include "huhu.h"
 
 
 /*
@@ -34,6 +38,21 @@
 #define SPILT_WIDTH 40
 #define SPILT_HEIGHT 24
 
+
+typedef struct pic_parse{
+    int counter_black_c8;
+    int counter_black_c4;
+    int counter_black_c2;
+    int counter_black_c1;
+    int counter_white_c8;
+    int counter_white_c4;
+    int counter_white_c2;
+    int counter_white_c1;
+    int c8:1;
+    int c4:1;
+    int c2:1;
+    int c1:1;
+}pic_parse_t;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class mainWidget; }
@@ -90,7 +109,17 @@ private slots:
 
     void on_load_partition_pb_clicked();
 
+    void on_train_threshold_pb_clicked();
+
+    void on_open_comm_pb_clicked();
+
+    void on_open_CCD_pb_clicked();
+
+    void on_get_picture_pb_clicked();
+
 private:
+    void init_serial_port(void);
+    void init_ccd_dev(void);
     void static_data_init(void);
     void DataBase_init(void);
     void open_database_table(void);
@@ -103,7 +132,7 @@ private:
     void tableview_data_clear(void);
     void tableview_add_item(QString region_value, int x1_value, int y1_value, int x2_value, int y2_value, int yz_value, int width_value, int height_value, int id_value);
 
-    int update_database_threshold(cv::Mat &src, QString &pic_data, int pic_num);
+    int update_database_threshold(cv::Mat &src, int pic_num);
 private:
     Ui::mainWidget *ui;
     //use timer
@@ -142,6 +171,17 @@ private:
     int edit_display_Y;
     int edit_display_width;
     int edit_display_height;
+
+    //video capture
+    cv::VideoCapture m_videoCapture;
+
+    //CCD open push button flag
+    bool ccd_open_flag;
+    // comm open push button flag
+    bool comm_open_flag;
+    //serial port name
+    QString m_serial_name;
+    usbserial *m_serial;
 
     int x1_gen_part_value[SPILT_WIDTH][SPILT_HEIGHT];
     int y1_gen_part_value[SPILT_WIDTH][SPILT_HEIGHT];

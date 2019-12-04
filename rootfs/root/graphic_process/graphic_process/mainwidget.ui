@@ -23,17 +23,17 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="setHeader_pb">
+  <widget class="QPushButton" name="db_create_pb">
    <property name="geometry">
     <rect>
      <x>70</x>
-     <y>590</y>
+     <y>550</y>
      <width>89</width>
      <height>25</height>
     </rect>
    </property>
    <property name="text">
-    <string>setHeader</string>
+    <string>create </string>
    </property>
   </widget>
   <widget class="QLineEdit" name="picture_path_edit">
@@ -412,9 +412,6 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="1">
-     <widget class="QLineEdit" name="comm_edit"/>
-    </item>
     <item row="0" column="2">
      <spacer name="horizontalSpacer_5">
       <property name="orientation">
@@ -429,16 +426,16 @@
      </spacer>
     </item>
     <item row="0" column="3" colspan="2">
-     <widget class="QPushButton" name="close_comm_pb">
+     <widget class="QPushButton" name="open_comm_pb">
       <property name="text">
-       <string>close comm</string>
+       <string>open comm</string>
       </property>
      </widget>
     </item>
     <item row="0" column="5">
-     <widget class="QPushButton" name="close_CCD_pb">
+     <widget class="QPushButton" name="open_CCD_pb">
       <property name="text">
-       <string>close CCD</string>
+       <string>open CCD</string>
       </property>
      </widget>
     </item>
@@ -584,9 +581,9 @@
      </widget>
     </item>
     <item row="3" column="6">
-     <widget class="QPushButton" name="test_file_pb">
+     <widget class="QPushButton" name="train_threshold_pb">
       <property name="text">
-       <string>test file</string>
+       <string>train threshold</string>
       </property>
      </widget>
     </item>
@@ -616,6 +613,9 @@
        <string>load Shade</string>
       </property>
      </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QComboBox" name="comm_box"/>
     </item>
    </layout>
   </widget>
@@ -726,7 +726,7 @@
     <enum>QAbstractItemView::SelectRows</enum>
    </property>
   </widget>
-  <widget class="QPushButton" name="db_test_add">
+  <widget class="QPushButton" name="db_drop_pb">
    <property name="geometry">
     <rect>
      <x>70</x>
@@ -736,7 +736,33 @@
     </rect>
    </property>
    <property name="text">
-    <string>db_add</string>
+    <string>drop</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="db_open_pb">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>510</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>open</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="db_select_pb">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>590</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>select</string>
    </property>
   </widget>
  </widget>

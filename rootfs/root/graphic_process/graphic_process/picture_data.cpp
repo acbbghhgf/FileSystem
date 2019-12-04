@@ -69,7 +69,7 @@ void make_picture_data(int four_blocks_row_num, int four_blocks_col_num)
 //        qDebug() << "picture : " << tmp;
         make_encode_pic_save(const_cast<std::string &>(*it), static_cast<int>(it-model_strs.cbegin()), four_blocks_row_num, four_blocks_col_num);
     }
-    qDebug() << "picture 18 data:" << save_pic_data[18];
+//    qDebug() << "picture 18 data:" << save_pic_data[18];
 
 }
 
@@ -82,6 +82,7 @@ int make_encode_pic_save(std::string &encode_content_one_pic, int pic_num, int f
                four_blocks_row_num * four_blocks_col_num);
         return -1;
     }
+    save_pic_data[pic_num].clear();
     for (auto it = encode_content_one_pic.cbegin(); it != encode_content_one_pic.cend();)
     {
         for (int cur_y = 0; cur_y < four_blocks_row_num; ++cur_y)
@@ -89,9 +90,7 @@ int make_encode_pic_save(std::string &encode_content_one_pic, int pic_num, int f
             for (int cur_x = 0; cur_x < four_blocks_col_num; cur_x += 2)
             {
                 if (it != encode_content_one_pic.cend())
-                {/*
-                    charShow(start_x, start_y, cur_x, cur_y, draw_width, draw_height, four_blocks_col_num,
-                             four_blocks_row_num, static_cast<unsigned char>(*it), pix_one);*/
+                {
                     save_pic_data[pic_num].push_back(static_cast<unsigned char>(*it));
                     ++it;
                 }
@@ -105,8 +104,10 @@ int make_encode_pic_save(std::string &encode_content_one_pic, int pic_num, int f
     return 0;
 }
 
-QString get_pic_data(int pic_num)
+QString get_pic_data(int four_blocks_row_num, int four_blocks_col_num, int pic_num)
 {
+    if(save_pic_data[pic_num].isEmpty())
+        make_picture_data(four_blocks_row_num, four_blocks_col_num);
     QString tmp = save_pic_data[pic_num];
     return tmp;
 }
