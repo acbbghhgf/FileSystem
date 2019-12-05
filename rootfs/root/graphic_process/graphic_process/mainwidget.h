@@ -117,7 +117,15 @@ private slots:
 
     void on_get_picture_pb_clicked();
 
+    void on_tableView_clicked(const QModelIndex &index);
+
 private:
+    //init database
+    void init_database(void);
+    int database_create_partiton_table(void);
+    int database_create_threshold_table(void);
+    void init_split_partition(int x1, int y1, int x2, int y2, int yz);
+
     void init_serial_port(void);
     void init_ccd_dev(void);
     void static_data_init(void);
@@ -130,7 +138,7 @@ private:
 
     void tableview_init(void);
     void tableview_data_clear(void);
-    void tableview_add_item(QString region_value, int x1_value, int y1_value, int x2_value, int y2_value, int yz_value, int width_value, int height_value, int id_value);
+    void tableview_add_item(QString one_partition, QString two_partition, int x1_value, int y1_value, int x2_value, int y2_value, int yz_value, int width_value, int height_value, int id_value);
 
     int update_database_threshold(cv::Mat &src, int pic_num);
 private:
