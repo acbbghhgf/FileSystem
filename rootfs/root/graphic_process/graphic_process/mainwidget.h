@@ -139,6 +139,7 @@ private:
     void tableview_init(void);
     void tableview_data_clear(void);
     void tableview_add_item(QString one_partition, QString two_partition, int x1_value, int y1_value, int x2_value, int y2_value, int yz_value, int width_value, int height_value, int id_value);
+    void tableview_insert_item(int index, QString one_partition, QString two_partition, int x1_value, int y1_value, int x2_value, int y2_value, int yz_value, int width_value, int height_value, int id_value);
 
     int update_database_threshold(cv::Mat &src, int pic_num);
 private:
@@ -151,7 +152,9 @@ private:
 
     //display table data
     QStandardItemModel *model;
-
+    int model_modify_index;
+    //modify one partition flag
+    bool one_partition_modify_flag;
 
     //picture filename path
     QString pictrue_path;

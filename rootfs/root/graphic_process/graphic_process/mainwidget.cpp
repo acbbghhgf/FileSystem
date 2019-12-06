@@ -200,6 +200,24 @@ void mainWidget::tableview_add_item(QString one_partition, QString two_partition
     model->appendRow(mlist);
 }
 
+void mainWidget::tableview_insert_item(int index, QString one_partition, QString two_partition, int x1_value, int y1_value, int x2_value, int y2_value, int yz_value, int width_value, int height_value, int id_value)
+{
+    //add model item value
+    QList<QStandardItem*> mlist;
+    mlist.append(new QStandardItem(one_partition));
+    mlist.append(new QStandardItem(two_partition));
+    mlist.append(new QStandardItem(QString("%1").arg(x1_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(y1_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(x2_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(y2_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(yz_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(width_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(height_value)));
+    mlist.append(new QStandardItem(QString("%1").arg(id_value)));
+
+    model->insertRow(index, mlist);
+}
+
 void mainWidget::static_data_init()
 {
     //init edit
@@ -447,30 +465,66 @@ void mainWidget::m_update_Onepartition_Pixmap(cv::Mat &dst, QImage::Format flag,
 
 void mainWidget::on_modify_pb_clicked()
 {
-    int tmp_x1, tmp_y1, tmp_width, tmp_height;
-    qDebug() << "x1 " << edit_display_x1 << "x2 " << edit_display_x2 << "y1 " << edit_display_y1 << "y2 " << edit_display_y2;
-    if(edit_display_x1 <= 10)
-        tmp_x1 = edit_display_x1;
-    else
-        tmp_x1 = edit_display_x1 - 10;
-    if(edit_display_y1 <= 10)
-        tmp_y1 = edit_display_y1;
-    else
-        tmp_y1 = edit_display_y1 - 10;
-    if((edit_display_x2 - edit_display_x1) <= 0)
-        tmp_width = 0;
-    else
-        tmp_width = edit_display_x2 - edit_display_x1;
-    if((edit_display_y2 - edit_display_y1) <= 0)
-        tmp_height = 0;
-    else
-        tmp_height = edit_display_y2 - edit_display_y1;
 
-//    process_mid_picture = process_mid_picture(cv::Rect(tmp_x1, tmp_y1, tmp_width, tmp_height));
-    tableview_data_clear();
-    tableview_add_item(QString("0-0"),QString("0-0"), edit_display_x1, edit_display_y1, edit_display_x2, edit_display_y2, edit_display_width, edit_display_yz, edit_display_width, edit_display_height);
-    m_updatePixmap(process_mid_picture);
-    update_display();
+    int tmp_x1, tmp_y1, tmp_x2, tmp_y2,  tmp_width, tmp_height, yz, X, Y, id;
+    QString one_partition, two_partition;
+    if(!one_partition_modify_flag)
+    {
+        qDebug() << "x1 " << edit_display_x1 << "x2 " << edit_display_x2 << "y1 " << edit_display_y1 << "y2 " << edit_display_y2;
+        if(edit_display_x1 <= 10)
+            tmp_x1 = edit_display_x1;
+        else
+            tmp_x1 = edit_display_x1 - 10;
+        if(edit_display_y1 <= 10)
+            tmp_y1 = edit_display_y1;
+        else
+            tmp_y1 = edit_display_y1 - 10;
+        if((edit_display_x2 - edit_display_x1) <= 0)
+            tmp_width = 0;
+        else
+            tmp_width = edit_display_x2 - edit_display_x1;
+        if((edit_display_y2 - edit_display_y1) <= 0)
+            tmp_height = 0;
+        else
+            tmp_height = edit_display_y2 - edit_display_y1;
+
+        tableview_data_clear();
+        tableview_add_item(QString("0-0"),QString("0-0"), edit_display_x1, edit_display_y1, edit_display_x2, edit_display_y2, edit_display_width, edit_display_yz, edit_display_width, edit_display_height);
+        m_updatePixmap(process_mid_picture);
+        update_display();
+    }
+    else
+    {
+        QList<QStandardItem*> mlist;
+        mlist = model->takeRow(model_modify_index);
+        if(mlist.isEmpty())
+        {
+            qDebug() << "get current list is null.";
+            return;
+        }
+        one_partition = mlist.takeFirst()->text();
+        two_partition = mlist.takeFirst()->text();
+        tmp_x1 = mlist.takeFirst()->text().toInt();
+        tmp_y1 = mlist.takeFirst()->text().toInt();
+        tmp_x2 = mlist.takeFirst()->text().toInt();
+        tmp_y2 = mlist.takeFirst()->text().toInt();
+        yz = mlist.takeFirst()->text().toInt();
+        tmp_width = mlist.takeFirst()->text().toInt();
+        tmp_height = mlist.takeFirst()->text().toInt();
+        id = mlist.takeFirst()->text().toInt();
+
+        tmp_x1 = ui->x1_edit->text().toInt();
+        tmp_y1 = ui->y1_edit->text().toInt();
+        tmp_x2 = ui->x2_edit->text().toInt();
+        tmp_y2 = ui->y2_edit->text().toInt();
+        tmp_width = ui->width_edit->text().toInt();
+        tmp_height = ui->height_edit->text().toInt();
+        yz = ui->yz_edit->text().toInt();
+        X = ui->X_edit->text().toInt();
+        Y = ui->Y_edit->text().toInt();
+
+        tableview_insert_item(model_modify_index, one_partition, two_partition, tmp_x1, tmp_y1, tmp_x2, tmp_y2, yz, tmp_width, tmp_height, id);
+    }
 }
 
 void mainWidget::on_x1_edit_textChanged(const QString &arg1)
@@ -521,6 +575,8 @@ void mainWidget::on_Y_edit_textChanged(const QString &arg1)
 
 void mainWidget::on_one_click_partition_pb_clicked()
 {
+    if(!one_partition_modify_flag)
+        one_partition_modify_flag = true;
     //split 40 * 24 partition insert partition
     init_split_partition(edit_display_x1, edit_display_y1, edit_display_x2, edit_display_y2, edit_display_yz);
 
@@ -594,7 +650,8 @@ void mainWidget::on_two_partition_pb_clicked()
     int field_width_value = 0;
     int field_height_value = 0;
 
-    QString pa_region;
+    QString one_partition;
+    QString two_partition;
     int pa_x1, pa_y1, pa_x2, pa_y2, pa_yz, pa_width, pa_height, pa_id;
     QList<QStandardItem *> tmp_list;
     int counter = 0;
@@ -610,7 +667,8 @@ void mainWidget::on_two_partition_pb_clicked()
             qDebug() << "tmp_list is null";
             break;
         }
-        pa_region = tmp_list.takeFirst()->text();
+        one_partition = tmp_list.takeFirst()->text();
+        two_partition = tmp_list.takeFirst()->text();
         pa_x1 = tmp_list.takeFirst()->text().toInt();
         pa_y1 = tmp_list.takeFirst()->text().toInt();
         pa_x2 = tmp_list.takeFirst()->text().toInt();
@@ -1273,6 +1331,7 @@ void mainWidget::on_tableView_clicked(const QModelIndex &index)
 {
     QList<QStandardItem *> tmp_list;
     int row_num =index.row();
+    model_modify_index = index.row();
     tmp_list = model->takeRow(index.row());
     QString one_partition = tmp_list.takeFirst()->text();
     QString two_partition = tmp_list.takeFirst()->text();
@@ -1307,4 +1366,5 @@ void mainWidget::on_tableView_clicked(const QModelIndex &index)
     tmp_list.append(new QStandardItem(QString("%1").arg(pa_id)));
 
     model->insertRow(row_num, tmp_list);
+
 }
