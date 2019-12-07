@@ -4,8 +4,10 @@
 usbserial::usbserial()
 {
     char def_devName[] = "/dev/ttyUSB0";
-    usbserial_devName = new char[strlen(def_devName)+1];
+    usbserial_devName = new char[strlen(def_devName) + 1];
+    bzero(usbserial_devName, strlen(def_devName)+1);
     memcpy(usbserial_devName, def_devName, strlen(def_devName));
+
     usbserial_speed = getBaudrate(9600);
     dev_fd = -1;
     dev_fd = OpenDev();
@@ -15,11 +17,12 @@ usbserial::usbserial(char *devname, int speed)
 {
     usbserial_speed = getBaudrate(speed);
     if(devname != nullptr){
-	usbserial::usbserial_devName = new char[strlen(devname)+1];
+        usbserial::usbserial_devName = new char[strlen(devname) + 1];
+        bzero(usbserial_devName, strlen(devname)+1);
         memcpy(usbserial_devName, devname, strlen(devname));
     }
     else{
-	usbserial::usbserial_devName = nullptr;
+        usbserial::usbserial_devName = nullptr;
     }
     dev_fd = -1;
     dev_fd = OpenDev();

@@ -725,61 +725,6 @@ void mainWidget::on_two_partition_pb_clicked()
     qDebug() << "data base insert counter = " << counter;
 }
 
-void mainWidget::on_db_open_pb_clicked()
-{
-//    qDebug() << "qsqldatabase::drivers = " << QSqlDatabase::drivers();
-//    db = QSqlDatabase::addDatabase("QSQLITE");
-//    db.setDatabaseName("testDB.db");
-//    db.setUserName("root");
-//    db.setPassword("123456");
-//    qDebug() << "qsqldatabase set success";
-}
-
-void mainWidget::on_db_create_pb_clicked()
-{
-    bool isOk = db.open();
-        if(!isOk){
-            qDebug()<<"error info :"<<db.lastError();
-        }
-        else{
-            QSqlQuery query;
-            // create table test
-            QString creatTableStr = "CREATE TABLE test\
-                    ( \
-                       field_id int, \
-                        x1 int, \
-                        y1 int, \
-                        x2 int, \
-                        y2 int, \
-                        yz int, \
-                        black_threshold_1 int, \
-                        white_threshold_1 int, \
-                        second_threshold_1 int, \
-                        black_threshold_2 int, \
-                        white_threshold_2 int, \
-                        second_threshold_2 int, \
-                        black_threshold_4 int, \
-                        white_threshold_4 int, \
-                        second_threshold_4 int, \
-                        black_threshold_8 int, \
-                        white_threshold_8 int, \
-                        second_threshold_8 int, \
-                        judge_1 int, \
-                        judge_2 int, \
-                        judge_4 int, \
-                        judge_8 int);";
-            query.prepare(creatTableStr);
-            if(!query.exec()){
-                qDebug()<<"query error :"<<query.lastError();
-                query.finish();
-            }
-            else{
-                qDebug()<<"creat table success!";
-                query.finish();
-            }
-        }
-}
-
 void mainWidget::on_db_select_pb_clicked()
 {
     QSqlQuery query;
@@ -897,22 +842,6 @@ void mainWidget::on_db_select_pb_clicked()
     }
 }
 
-void mainWidget::on_db_drop_pb_clicked()
-{
-    QSqlQuery query;
-    QString drop_sql = "drop table test";
-    query.prepare(drop_sql);
-    if(!query.exec())
-    {
-        qDebug()<<query.lastError();
-    }
-    else
-    {
-        qDebug()<<"updated!";
-        query.finish();
-    }
-    model->clear();
-}
 
 void mainWidget::on_training_pb_clicked()
 {
@@ -1249,18 +1178,23 @@ void mainWidget::on_open_comm_pb_clicked()
 {
     if(!comm_open_flag)
     {// open serial comm ops
-        if(m_serial_name != ui->comm_box->currentText())
-        {
-            if(m_serial)
-                delete m_serial;
-            qDebug() << "close current serial port name = " << m_serial_name;
-        }
+
         m_serial = new usbserial;
         comm_open_flag = true;
         ui->open_comm_pb->setText("close comm");
     }
     else
     {
+        if(m_serial_name != ui->comm_box->currentText())
+        {
+            if(m_serial != nullptr)
+                delete m_serial;
+            qDebug() << "close current serial port name = " << m_serial_name;
+            m_serial = new usbserial;
+            comm_open_flag = true;
+            ui->open_comm_pb->setText("close comm");
+            return;
+        }
         // close serial comm ops
         if(m_serial)
             delete m_serial;
@@ -1273,6 +1207,7 @@ void mainWidget::on_open_comm_pb_clicked()
 void mainWidget::init_serial_port(void)
 {
     comm_open_flag = false;
+    m_serial = nullptr;
     const auto infos = QSerialPortInfo::availablePorts();
     for(const QSerialPortInfo &info : infos)
     {

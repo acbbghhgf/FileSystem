@@ -95,13 +95,7 @@ private slots:
 
     void on_two_partition_pb_clicked();
 
-    void on_db_open_pb_clicked();
-
-    void on_db_create_pb_clicked();
-
     void on_db_select_pb_clicked();
-
-    void on_db_drop_pb_clicked();
 
     void on_training_pb_clicked();
 
